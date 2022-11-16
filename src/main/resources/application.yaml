@@ -1,0 +1,31 @@
+spring:
+  application.name: kafka-streams-service
+  kafka:
+    bootstrap-servers: 'localhost:9092'
+  cloud:
+    function:
+      definition: 'simpleConsumer;simpleConsumer2'
+    stream:
+      kafka.streams.binder:
+        application-id: kafka-streams-service
+        configuration:
+#          num.stream.threads: 2
+          default:
+            key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+            value.serde: org.springframework.kafka.support.serializer.JsonSerde
+            deserialization.exception.handler: org.apache.kafka.streams.errors.LogAndContinueExceptionHandler
+        functions:
+          simpleConsumer.applicationId: simpleConsumer
+          simpleConsumer2.applicationId: simpleConsumer2
+      bindings:
+        simpleConsumer-in-0.destination: simple.topic.test
+        simpleConsumer2-in-0.destination: simple.topic.test2
+
+logging:
+  level:
+    root: info
+    kafka: error
+    state.change.logger: error
+    org.apache.kafka: error
+    org.apache.kafka.streams: info
+    org.apache.zookeeper: error
