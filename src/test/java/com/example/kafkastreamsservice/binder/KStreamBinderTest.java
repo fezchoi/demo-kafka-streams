@@ -32,7 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @DirtiesContext
 @EmbeddedKafka(
         topics = {"simple.topic.test", "simple.topic.test2"},
-        partitions = 1,
+        partitions = 5,
         brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"}
 )
 class KStreamBinderTest {
@@ -72,14 +72,14 @@ class KStreamBinderTest {
 
         //when
         for (int i = 0; i < 10; i++) {
-            ProducerRecord<String, Map<String, Object>> record = new ProducerRecord<>(topic, String.valueOf(i), value);
-            record.headers().add("test-header-key", "test-header-value".getBytes(StandardCharsets.UTF_8));
-            kafkaProducer.send(record);
             ProducerRecord<String, Map<String, Object>> record2 = new ProducerRecord<>(topic2, String.valueOf(i + 10), value);
             record2.headers().add("test-header-key", "test-header-value".getBytes(StandardCharsets.UTF_8));
             kafkaProducer.send(record2);
+            ProducerRecord<String, Map<String, Object>> record = new ProducerRecord<>(topic, String.valueOf(i), value);
+            record.headers().add("test-header-key", "test-header-value".getBytes(StandardCharsets.UTF_8));
+            kafkaProducer.send(record);
         }
-        kafkaConsumer.getLatch().await(30000, TimeUnit.MILLISECONDS);
+        kafkaConsumer.getLatch().await(60000, TimeUnit.MILLISECONDS);
 
         //then
         assertThat(kafkaConsumer.getLatch().getCount(), Matchers.equalTo(0L));

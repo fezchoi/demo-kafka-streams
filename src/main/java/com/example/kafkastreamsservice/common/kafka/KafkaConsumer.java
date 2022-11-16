@@ -25,7 +25,7 @@ public class KafkaConsumer {
 
     private String payload = null;
     private String value = null;
-    private CountDownLatch latch = new CountDownLatch(1);
+    private CountDownLatch latch = new CountDownLatch(20);
 
     @KafkaListener(topics = topic, groupId = group)
     public void receive(ConsumerRecord<?, ?> consumerRecord) {
