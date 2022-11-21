@@ -22,6 +22,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -31,8 +32,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @SpringBootTest
 @DirtiesContext
 @EmbeddedKafka(
-        topics = {"simple.topic.test", "simple.topic.test2"},
-        partitions = 5,
+        topics = {"simple.topic.test", "simple.topic.test2", "generate", "process", "process.out", "simple.topic.test3", "simple.topic.test4", "test"},
+        partitions = 10,
         brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"}
 )
 class KStreamBinderTest {
@@ -43,24 +44,88 @@ class KStreamBinderTest {
     @Autowired
     private KafkaConsumer kafkaConsumer;
 
-//    @Autowired
-//    private Consumer simpleConsumer;
+    @Test
+    void embeddedKafkaTest() throws InterruptedException {
+        //given
+        String topic = "simple.topic.test";
+        String key = null;
+        Map<String, Object> value = Map.of("test-key", "test-value");
 
-//    @Test
-//    void embeddedKafkaTest() throws InterruptedException {
-//        //given
-//        String topic = "simple.topic.test";
-//        String key = null;
+        //when
+        kafkaProducer.send(topic, key, value);
+        kafkaConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS);
+
+        //then
+        assertThat(kafkaConsumer.getLatch().getCount(), Matchers.equalTo(0L));
+        assertThat(kafkaConsumer.getValue(), Matchers.containsString("test-value"));
+    }
+
+    @Test
+    void embeddedKafkaTest2() throws InterruptedException {
+        //given
+        String topic = "simple.topic.test2";
+        String key = null;
 //        Map<String, Object> value = Map.of("test-key", "test-value");
-//
-//        //when
-//        kafkaProducer.send(topic, key, value);
-//        kafkaConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS);
-//
-//        //then
-//        assertThat(kafkaConsumer.getLatch().getCount(), Matchers.equalTo(0L));
-//        assertThat(kafkaConsumer.getValue(), Matchers.containsString("test-value"));
-//    }
+        Map<String, Object> value = new HashMap<>();
+        value.put("test-key", "test-value");
+
+        //when
+        for (int i = 0; i < 10; i++) {
+            value.put("test-seq", i);
+            ProducerRecord<String, Map<String, Object>> record = new ProducerRecord<>(topic, 0, String.valueOf(i), value);
+            record.headers().add("test-header-key", "test-header-value".getBytes(StandardCharsets.UTF_8));
+            kafkaProducer.send(record);
+        }
+        kafkaConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS);
+
+        //then
+        assertThat(kafkaConsumer.getLatch().getCount(), Matchers.equalTo(0L));
+        assertThat(kafkaConsumer.getValue(), Matchers.containsString("test-value"));
+    }
+
+    @Test
+    void embeddedKafkaTest3() throws InterruptedException {
+        //given
+        String topic = "simple.topic.test3";
+        String key = null;
+        Map<String, Object> value = new HashMap<>();
+        value.put("test-key", "test-value");
+
+        //when
+        for (int i = 0; i < 30; i++) {
+            value.put("test-seq", i);
+            ProducerRecord<String, Map<String, Object>> record = new ProducerRecord<>(topic, String.valueOf(i), value);
+            record.headers().add("test-header-key", "test-header-value".getBytes(StandardCharsets.UTF_8));
+            kafkaProducer.send(record);
+        }
+        kafkaConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS);
+
+        //then
+        assertThat(kafkaConsumer.getLatch().getCount(), Matchers.equalTo(0L));
+        assertThat(kafkaConsumer.getValue(), Matchers.containsString("test-value"));
+    }
+
+    @Test
+    void embeddedKafkaTest4() throws InterruptedException {
+        //given
+        String topic = "simple.topic.test4";
+        String key = null;
+        Map<String, Object> value = new HashMap<>();
+        value.put("test-key", "test-value");
+
+        //when
+        for (int i = 0; i < 10; i++) {
+            value.put("test-seq", i);
+            ProducerRecord<String, Map<String, Object>> record = new ProducerRecord<>(topic, String.valueOf(i), value);
+            record.headers().add("test-header-key", "test-header-value".getBytes(StandardCharsets.UTF_8));
+            kafkaProducer.send(record);
+        }
+        kafkaConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS);
+
+        //then
+        assertThat(kafkaConsumer.getLatch().getCount(), Matchers.equalTo(0L));
+        assertThat(kafkaConsumer.getValue(), Matchers.containsString("test-value"));
+    }
 
     @Test
     void simpleConsumerKafkaTest() throws InterruptedException {

@@ -21,6 +21,8 @@ public class KafkaConsumer {
 
     private final String topic = "simple.topic.test";
     private final String topic2 = "simple.topic.test2";
+    private final String topic3 = "simple.topic.test3";
+    private final String topic4 = "simple.topic.test4";
     private final String group = "kafka-streams-service-test";
 
     private String payload = null;
@@ -39,6 +41,26 @@ public class KafkaConsumer {
 
     @KafkaListener(topics = topic2, groupId = group)
     public void receive2(ConsumerRecord<?, ?> consumerRecord) {
+        String key = new String((byte[]) consumerRecord.key());
+        String value = new String((byte[]) consumerRecord.value());
+        log.info("[KafkaConsumer] receive | topic : {}, partition : {}, key : {}, value : {}", consumerRecord.topic(), consumerRecord.partition(), key, value);
+        setPayload(consumerRecord.toString());
+        setValue(value);
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = topic3, groupId = group)
+    public void receive3(ConsumerRecord<?, ?> consumerRecord) {
+        String key = new String((byte[]) consumerRecord.key());
+        String value = new String((byte[]) consumerRecord.value());
+        log.info("[KafkaConsumer] receive | topic : {}, partition : {}, key : {}, value : {}", consumerRecord.topic(), consumerRecord.partition(), key, value);
+        setPayload(consumerRecord.toString());
+        setValue(value);
+        latch.countDown();
+    }
+
+    @KafkaListener(topics = topic4, groupId = group)
+    public void receive4(ConsumerRecord<?, ?> consumerRecord) {
         String key = new String((byte[]) consumerRecord.key());
         String value = new String((byte[]) consumerRecord.value());
         log.info("[KafkaConsumer] receive | topic : {}, partition : {}, key : {}, value : {}", consumerRecord.topic(), consumerRecord.partition(), key, value);

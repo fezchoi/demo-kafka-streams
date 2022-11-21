@@ -4,12 +4,12 @@ spring:
     bootstrap-servers: 'localhost:9092'
   cloud:
     function:
-      definition: 'simpleConsumer;simpleConsumer2;'
+      definition: 'simpleConsumer;simpleConsumer2;generate;process|subscribe;simpleConsumer3;simpleConsumer4;'
     stream:
       kafka.streams.binder:
         application-id: kafka-streams-service
         configuration:
-          num.stream.threads: 5
+#          num.stream.threads: 5
           default:
             key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
             value.serde: org.springframework.kafka.support.serializer.JsonSerde
@@ -17,9 +17,17 @@ spring:
         functions:
           simpleConsumer.applicationId: simpleConsumer
           simpleConsumer2.applicationId: simpleConsumer2
+          generate.applicationId: generate
+          process|subscribe.applicationId: process
+          simpleConsumer3.applicationId: simpleConsumer3
+          simpleConsumer4.applicationId: simpleConsumer4
       bindings:
         simpleConsumer-in-0.destination: simple.topic.test
         simpleConsumer2-in-0.destination: simple.topic.test2
+        generate-out-0.destination: generate
+        process|subscribe-in-0.destination: generate
+        simpleConsumer3-in-0.destination: simple.topic.test3
+        simpleConsumer4-in-0.destination: simple.topic.test4
 
 logging:
   level:
